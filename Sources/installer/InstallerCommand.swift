@@ -12,15 +12,17 @@ struct InstallerCommand: ParsableCommand {
                 options: [.create, .truncate],
                 permissions: [.ownerRead, .groupRead, .otherRead]
             )
-            _ = try descriptor.writeAll(
-                """
-                Name: llvm
-                Description: LLVM for llvm-swift
-                Version: 22.1.8_2
-                Cflags: -I/opt/homebrew/Cellar/llvm/22.1.8_2/include
-                Libs: -L/opt/homebrew/Cellar/llvm/22.1.8_2/lib -lLLVM-22
-                """.utf8
-            )
+            try descriptor.closeAfter {
+                _ = try descriptor.writeAll(
+                    """
+                    Name: llvm
+                    Description: LLVM for llvm-swift
+                    Version: 22.1.8_2
+                    Cflags: -I/opt/homebrew/Cellar/llvm/22.1.8_2/include
+                    Libs: -L/opt/homebrew/Cellar/llvm/22.1.8_2/lib -lLLVM-22
+                    """.utf8
+                )
+            }
         } catch {
             throw StringError("Failed to create 'llvm.pc': \(error)")
         }
@@ -30,8 +32,19 @@ struct InstallerCommand: ParsableCommand {
         CommandConfiguration(
             commandName: "llvm-swift-installer",
             abstract: "Installer for llvm-swift on macOS.",
-            version: "0.0.0",
+            version: "1.0.0",
             helpNames: .long
         )
     }
+}
+
+struct StringError: Error, CustomStringConvertible {
+    
+    var message: String
+    
+    init(_ message: String) {
+        self.message = message
+    }
+    
+    var description: String { message }
 }
